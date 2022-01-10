@@ -7,7 +7,16 @@ const apiClient = axios.create({
   },
 })
 
-export async function getSymbolsPrice(symbols: string[], targets = ['USD']) {
+interface Prices {
+  [symbol: string]: {
+    [currency: string]: number
+  }
+}
+
+export async function getSymbolsPrices(
+  symbols: string[],
+  targets = ['USD']
+): Promise<Prices> {
   const fsyms = symbols.join(',') || 'BTC'
   const tsyms = targets.join(',')
   const multi = symbols.length > 1
@@ -18,5 +27,5 @@ export async function getSymbolsPrice(symbols: string[], targets = ['USD']) {
     }=${fsyms}&tsyms=${tsyms}`
   )
 
-  return data
+  return multi ? data : { [fsyms]: data }
 }

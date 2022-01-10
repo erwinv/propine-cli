@@ -2,7 +2,7 @@ import 'dotenv-safe/config'
 import { Command } from 'commander'
 import { DateTime } from 'luxon'
 import app from '../lib/app'
-import { getSymbolsPrice } from '../lib/exchange-rates-api'
+import { getSymbolsPrices } from '../lib/prices-api'
 
 const cli = new Command('propine')
 
@@ -42,7 +42,7 @@ cli
     const { token = ['BTC'], target = ['USD'] } = options
     console.info({ token, target })
 
-    const prices = await getSymbolsPrice(token, target)
+    const prices = await getSymbolsPrices(token, target)
     console.info({ prices })
   })
 
