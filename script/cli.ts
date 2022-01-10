@@ -1,3 +1,4 @@
+import 'dotenv-safe/config'
 import { Command } from 'commander'
 import { DateTime } from 'luxon'
 import app from '../lib/app'
