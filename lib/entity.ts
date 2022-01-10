@@ -1,7 +1,5 @@
-import { DateTime } from 'luxon'
-
 export interface Transaction {
-  timestamp: DateTime
+  timestamp: number
   transactionType: 'DEPOSIT' | 'WITHDRAWAL'
   token: string
   amount: number

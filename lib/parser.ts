@@ -4,7 +4,6 @@ import { pipeline } from 'stream/promises'
 import { createUnzip } from 'zlib'
 import { parse as parseCsv } from 'csv-parse'
 import { fromBinder, Next, End, Error, EventStream } from 'baconjs'
-import { DateTime } from 'luxon'
 import { Transaction } from './entity'
 
 export default function parse(path: string): EventStream<Transaction> {
@@ -23,7 +22,7 @@ export default function parse(path: string): EventStream<Transaction> {
         while ((record = csvParser.read()) !== null) {
           try {
             const transaction = {
-              timestamp: DateTime.fromSeconds(Number(record.timestamp)),
+              timestamp: Number(record.timestamp),
               transactionType: record.transaction_type,
               token: record.token,
               amount: Number(record.amount),

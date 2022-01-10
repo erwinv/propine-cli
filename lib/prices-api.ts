@@ -3,7 +3,7 @@ import axios from 'axios'
 const apiClient = axios.create({
   baseURL: 'https://min-api.cryptocompare.com/data',
   headers: {
-    Authorization: `Apikey ${process.env.API_KEY}`,
+    Authorization: `Apikey ${process.env.CRYPTO_COMPARE_API_KEY}`,
   },
 })
 
@@ -24,7 +24,7 @@ export async function getSymbolsPrices(
   const { data } = await apiClient.get(
     `/${multi ? 'pricemulti' : 'price'}?${
       multi ? 'fsyms' : 'fsym'
-    }=${fsyms}&tsyms=${tsyms}`
+    }=${fsyms}&tsyms=${tsyms}&extraParams=propineCli`
   )
 
   return multi ? data : { [fsyms]: data }

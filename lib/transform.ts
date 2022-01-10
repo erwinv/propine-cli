@@ -10,9 +10,13 @@ export function filter(
   if (tokens.length === 0 && !date) return transactions
 
   return transactions.filter((trx) => {
+    const shouldFilterToken = tokens.length > 0
+    const shouldFilterDate = date?.isValid ?? false
+    const unixDate = Math.floor(date?.toSeconds() ?? 0)
+
     return (
-      (tokens.length === 0 || tokens.includes(trx.token)) &&
-      (!(date?.isValid ?? false) || trx.timestamp <= date)
+      (!shouldFilterToken || tokens.includes(trx.token)) &&
+      (!shouldFilterDate || trx.timestamp <= unixDate)
     )
   })
 }
