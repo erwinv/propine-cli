@@ -1,0 +1,36 @@
+{
+  "name": "propine-interview-cli",
+  "version": "1.0.0",
+  "description": "",
+  "main": "bin/propine",
+  "scripts": {
+    "format": "prettier --write .",
+    "prelint": "npm run format",
+    "lint": "eslint . --ext .js,.ts",
+    "prebuild": "npm run lint",
+    "build": "tsc",
+    "pretest": "npm run build",
+    "test": "jest",
+    "build:watch": "tsc --watch",
+    "test:watch": "jest --watch --verbose=false --coverage=false"
+  },
+  "author": "Erwin Villejo",
+  "license": "ISC",
+  "engines": {
+    "node": ">=16.13.1"
+  },
+  "devDependencies": {
+    "@types/luxon": "^2.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.9.0",
+    "@typescript-eslint/parser": "^5.9.0",
+    "eslint": "^8.6.0",
+    "eslint-config-prettier": "^8.3.0",
+    "jest": "^27.4.7",
+    "prettier": "^2.5.1",
+    "typescript": "^4.5.4"
+  },
+  "dependencies": {
+    "commander": "^8.3.0",
+    "luxon": "^2.3.0"
+  }
+}
