@@ -2,6 +2,13 @@
 
 ## Usage
 
+Add your Crypto Compare API key to a `.env` file at the repo's root dir:
+
+```sh
+cp .env.example .env
+# open .env and paste your Crypto Compare API key
+```
+
 Install dependencies, then run the tests once to validate correctness. The test script also runs compile script which is needed by the CLI wrapper:
 
 ```sh
