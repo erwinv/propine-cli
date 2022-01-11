@@ -1,7 +1,10 @@
+import _ from 'lodash'
 import { EventStream, fromArray } from 'baconjs'
-import { parse as parseCsv } from 'csv-parse/sync'
+import { DateTime } from 'luxon'
 import { Transaction } from './entity'
 import { filter, groupAggregate, aggregate } from './transform'
+
+const { parse: parseCsv } = require('csv-parse/dist/cjs/sync.cjs') // eslint-disable-line @typescript-eslint/no-var-requires
 
 const testData = `timestamp,transaction_type,token,amount
 1571967208,DEPOSIT,BTC,0.298660
@@ -115,12 +118,123 @@ const transactionsArray = parseCsv(testData, { columns: true }).map(
     token: record.token,
     amount: Number(record.amount),
   })
-)
+) as Transaction[]
 
-const transactions = fromArray<Transaction>(transactionsArray)
+const transactions = () => fromArray<Transaction>(transactionsArray)
 
-it('transform#filter', async () => {
-  await expect(toArray(filter(transactions))).resolves.toEqual(
-    transactionsArray
-  )
+describe('transform#filter', () => {
+  test('token=[], date=null', async () => {
+    const actual = await toArray(filter(transactions()))
+    const expected = transactionsArray
+
+    expect(_.sortBy(actual, 'timestamp')).toEqual(
+      _.sortBy(expected, 'timestamp')
+    )
+  })
+
+  test.each([
+    [['BTC']],
+    [['ETH']],
+    [['XPR']],
+    [['BTC', 'ETH']],
+    [['BTC', 'XPR']],
+    [['ETH', 'XPR']],
+    [['BTC', 'ETH', 'XPR']],
+  ])('token=%j, date=null', async (tokens) => {
+    const actual = await toArray(filter(transactions(), tokens))
+    const expected = transactionsArray.filter(({ token }) =>
+      tokens.includes(token)
+    )
+
+    expect(_.sortBy(actual, 'timestamp')).toEqual(
+      _.sortBy(expected, 'timestamp')
+    )
+  })
+
+  test('token=[], date=1571964851', async () => {
+    const date = 1571964851
+
+    const actual = await toArray(
+      filter(transactions(), [], DateTime.fromSeconds(date))
+    )
+    const expected = transactionsArray.filter(
+      ({ timestamp }) => timestamp <= date
+    )
+
+    expect(_.sortBy(actual, 'timestamp')).toEqual(
+      _.sortBy(expected, 'timestamp')
+    )
+  })
+
+  test.each([
+    [['BTC']],
+    [['ETH']],
+    [['XPR']],
+    [['BTC', 'ETH']],
+    [['BTC', 'XPR']],
+    [['ETH', 'XPR']],
+    [['BTC', 'ETH', 'XPR']],
+  ])('token=%j, date=1571964851', async (tokens) => {
+    const date = 1571964851
+
+    const actual = await toArray(
+      filter(transactions(), tokens, DateTime.fromSeconds(date))
+    )
+    const expected = transactionsArray.filter(
+      ({ token, timestamp }) => tokens.includes(token) && timestamp <= date
+    )
+
+    expect(_.sortBy(actual, 'timestamp')).toEqual(
+      _.sortBy(expected, 'timestamp')
+    )
+  })
 })
+
+test('transform#groupAggregate', async () => {
+  const actual = await groupAggregate(transactions()).toPromise()
+  const expected = _.chain(transactionsArray)
+    .groupBy('token')
+    .mapValues((tokenTrxs) => {
+      const balance = tokenTrxs.reduce(
+        (balance, { amount, transactionType }) => {
+          switch (transactionType) {
+            case 'DEPOSIT':
+              return balance + amount
+            case 'WITHDRAWAL':
+              return balance - amount
+          }
+        },
+        0
+      )
+      return { balance }
+    })
+    .value()
+
+  expect(actual).toEqual(expected)
+})
+
+test.each(['BTC', 'ETH', 'XPR'])(
+  'transform#aggregate token=%s',
+  async (token) => {
+    const actual = await aggregate(
+      filter(transactions(), [token]),
+      token
+    ).toPromise()
+
+    const expected = {
+      token,
+      balance: transactionsArray
+        .filter((trx) => trx.token === token)
+        .reduce((balance, { amount, transactionType }) => {
+          switch (transactionType) {
+            case 'DEPOSIT':
+              return balance + amount
+            case 'WITHDRAWAL':
+              return balance - amount
+          }
+        }, 0),
+    }
+
+    expect(actual).toEqual(expected)
+  }
+)
