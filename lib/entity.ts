@@ -11,6 +11,6 @@ export interface Balance {
   balance: number
 }
 
-export interface Price {
-  price: string
+export interface Value {
+  value: string
 }

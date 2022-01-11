@@ -27,7 +27,7 @@ cli
     console.info({ file, token, date: date?.toString() ?? '' })
 
     const portfolio = await app(file, token, date)
-    console.info({ portfolio })
+    console.info(portfolio)
   })
 
 cli
@@ -43,7 +43,7 @@ cli
     console.info({ token, target })
 
     const prices = await getSymbolsPrices(token, target)
-    console.info({ prices })
+    console.info(prices)
   })
 
 async function main() {

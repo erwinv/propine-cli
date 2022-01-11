@@ -5,4 +5,5 @@ module.exports = {
   rootDir: 'build',
   testMatch: ['**/__tests__/**/*.js', '**/?(*.)+(spec|test).js'],
   verbose: true,
+  resolver: 'jest-node-exports-resolver',
 }

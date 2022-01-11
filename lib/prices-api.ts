@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { DateTime } from 'luxon'
 
 const apiClient = axios.create({
   baseURL: 'https://min-api.cryptocompare.com/data',
@@ -8,8 +9,11 @@ const apiClient = axios.create({
 })
 
 interface Prices {
-  [symbol: string]: {
-    [currency: string]: number
+  date: string
+  prices: {
+    [symbol: string]: {
+      [currency: string]: number
+    }
   }
 }
 
@@ -26,6 +30,8 @@ export async function getSymbolsPrices(
       multi ? 'fsyms' : 'fsym'
     }=${fsyms}&tsyms=${tsyms}&extraParams=propineCli`
   )
+  const date = DateTime.local().toString()
 
-  return multi ? data : { [fsyms]: data }
+  const prices = multi ? data : { [fsyms]: data }
+  return { prices, date }
 }

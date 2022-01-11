@@ -1,6 +1,6 @@
 import { EventStream } from 'baconjs'
 import { DateTime } from 'luxon'
-import { Transaction } from './entity'
+import { Balance, Portfolio, Transaction } from './entity'
 
 export function filter(
   transactions: EventStream<Transaction>,
@@ -19,6 +19,19 @@ export function filter(
       (!shouldFilterDate || trx.timestamp <= unixDate)
     )
   })
+}
+
+export function groupAggregate(transactions: EventStream<Transaction>) {
+  return transactions
+    .groupBy(
+      (trx) => trx.token,
+      (tokenTrxs, { token }) => aggregate(tokenTrxs, token)
+    )
+    .flatMap((trxs) => trxs)
+    .scan<Portfolio<Balance>>({}, (portfolio, { token, balance }) => ({
+      ...portfolio,
+      [token]: { balance },
+    }))
 }
 
 export function aggregate(tokenTrxs: EventStream<Transaction>, token: string) {

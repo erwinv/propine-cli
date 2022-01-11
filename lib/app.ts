@@ -1,35 +1,26 @@
 import { DateTime } from 'luxon'
-import { Balance, Portfolio, Price } from './entity'
+import { Balance, Portfolio, Value } from './entity'
 import { getSymbolsPrices } from './prices-api'
 import parse from './parser'
-import { aggregate, filter } from './transform'
+import { filter, groupAggregate } from './transform'
 
 export default async function (
   path: string,
   token: string[],
   date?: DateTime | null
-): Promise<Portfolio<Balance & Price>> {
+) {
   const transactions = parse(path)
+  const filtered = filter(transactions, token, date)
+  const groupAggregated = groupAggregate(filtered)
 
-  return filter(transactions, token, date)
-    .groupBy(
-      (trx) => trx.token,
-      (tokenTrxs, { token }) => aggregate(tokenTrxs, token)
-    )
-    .flatMap((trxs) => trxs)
-    .scan<Portfolio<Balance>>({}, (portfolio, { token, balance }) => ({
-      ...portfolio,
-      [token]: { balance },
-    }))
-    .toPromise()
-    .then(withPrice)
+  return groupAggregated.toPromise().then(withPrice)
 }
 
-async function withPrice(portfolio: Portfolio<Balance & Price>) {
+async function withPrice(portfolio: Portfolio<Balance & Value>) {
   const target = 'USD'
 
   const symbols = Object.keys(portfolio)
-  const prices = await getSymbolsPrices(symbols, [target])
+  const { prices, date } = await getSymbolsPrices(symbols, [target])
 
   const formatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -37,8 +28,8 @@ async function withPrice(portfolio: Portfolio<Balance & Price>) {
   })
 
   for (const [symbol, { balance }] of Object.entries(portfolio)) {
-    portfolio[symbol].price = formatter.format(balance * prices[symbol][target])
+    portfolio[symbol].value = formatter.format(balance * prices[symbol][target])
   }
 
-  return portfolio
+  return { portfolio, prices, date }
 }
