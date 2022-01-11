@@ -4,7 +4,7 @@ import { Transaction } from './entity'
 
 export function filter(
   transactions: EventStream<Transaction>,
-  tokens: string[],
+  tokens: string[] = [],
   date?: DateTime | null
 ) {
   if (tokens.length === 0 && !date) return transactions

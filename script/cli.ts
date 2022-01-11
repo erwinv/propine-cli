@@ -23,7 +23,7 @@ cli
     }
   )
   .action(async (file, options) => {
-    const { token = [], date } = options
+    const { token, date } = options
     console.info({ file, token, date: date?.toString() ?? '' })
 
     const portfolio = await app(file, token, date)
