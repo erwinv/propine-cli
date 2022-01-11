@@ -19,6 +19,7 @@ bin/propine portfolio transactions.csv.gz
 bin/propine portfolio transactions.csv.gz -t BTC
 bin/propine portfolio transactions.csv.gz -t BTC -t ETH
 bin/propine portfolio transactions.csv.gz -d '2021-02-21'
+bin/propine portfolio transactions.csv.gz -t XPR -d '2021-02-21'
 ```
 
 Get current prices (exchange rates):
